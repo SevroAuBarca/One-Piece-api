@@ -1,12 +1,18 @@
 // Require the framework and instantiate it
 import fastify from "fastify";
-import { getCharactersNamesScrapped } from "./src/services/scrapp.js";
+import {
+  getCharactersNamesScrapped,
+  scrapCharacterData,
+} from "./src/services/scrapp.js";
 
 const app = fastify({ logger: true });
 
 // Declare a route
 app.get("/", async (request, reply) => {
   const data = await getCharactersNamesScrapped();
+  scrapCharacterData("Kaidou");
+  scrapCharacterData(data[0]);
+
   return { characters: data };
 });
 
