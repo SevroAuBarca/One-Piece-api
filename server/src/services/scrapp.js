@@ -2,6 +2,9 @@ import axios from "axios"; // or const axios = require('axios');
 import { load } from "cheerio"; // const { load } = require('cheerio')
 import { Character } from "../models/Character.js";
 import download from "image-downloader";
+
+import appRoot from "app-root-path";
+import { uploadImage } from "./clodinary.js";
 let $;
 
 export const getCharactersNamesScrapped = async () => {
@@ -30,19 +33,18 @@ export const scrapCharacterData = async (name) => {
     const dataStadisticsTitles = getDataFromPage(
       ".pi-item.pi-data.pi-item-spacing.pi-border-color > h3"
     );
-
     const dataStadistics = getDataFromPage(
       ".pi-item.pi-data.pi-item-spacing.pi-border-color > .pi-data-value.pi-font"
     );
     const image = $(".image.image-thumbnail > .pi-image-thumbnail").attr("src");
-    downloadImage(image, name);
-    const keyValueData = {};
 
+    const imageFilePath = await downloadImage(image, name);
+    uploadImage(imageFilePath);
+    const keyValueData = {};
     dataStadisticsTitles.forEach((data, index) => {
       data = data.replaceAll(":", "");
       keyValueData[data] = dataStadistics[index];
     });
-    //console.log(image);
     return new Character({ name: name });
   } catch (error) {
     console.log(error);
@@ -59,12 +61,13 @@ const getDataFromPage = (selector) => {
 const downloadImage = async (url, name) => {
   const options = {
     url: url,
-    dest: `../../src/temp-assets/${name}.png`, // will be saved to /path/to/dest/image.jpg
+    dest: `${appRoot}/src/temp-assets/${name}.png`, // will be saved to /path/to/dest/image.jpg
   };
-  download
-    .image(options)
-    .then(({ filename }) => {
-      console.log("Saved to", filename); // saved to /path/to/dest/image.jpg
-    })
-    .catch((err) => console.error(err));
+
+  try {
+    const { filename } = await download.image(options);
+    return filename;
+  } catch (error) {
+    console.error(error.message);
+  }
 };

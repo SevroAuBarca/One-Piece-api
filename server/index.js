@@ -11,7 +11,6 @@ const app = fastify({ logger: true });
 app.get("/", async (request, reply) => {
   const data = await getCharactersNamesScrapped();
   scrapCharacterData("Kaidou");
-  scrapCharacterData(data[0]);
 
   return { characters: data };
 });
