@@ -6,12 +6,16 @@ cloudinary.config({
   api_secret: "wxpcHkkwekVYLf9tzCAtuhZxeTw",
 });
 
-export const uploadImage = async (path) => {
+export const uploadImage = async (path, name) => {
   try {
-    const res = await cloudinary.v2.uploader.upload(path, {
-      public_id: "olympic_flag",
+    const {
+      secure_url: url,
+      public_id,
+      original_filename,
+    } = await cloudinary.v2.uploader.upload(path, {
+      public_id: name,
     });
-    console.log(res);
+    return { url, public_id, original_filename };
   } catch (error) {
     console.log(error);
   }

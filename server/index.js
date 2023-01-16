@@ -1,5 +1,6 @@
 // Require the framework and instantiate it
 import fastify from "fastify";
+import { datatemp } from "./src/models/Characters.template.js";
 import {
   getCharactersNamesScrapped,
   scrapCharacterData,
@@ -10,9 +11,16 @@ const app = fastify({ logger: true });
 // Declare a route
 app.get("/", async (request, reply) => {
   const data = await getCharactersNamesScrapped();
-  scrapCharacterData("Kaidou");
+  const datatempKeys = datatemp.map((datakey) => Object.keys(datakey)).flat();
+  console.log(datatempKeys);
+  const filterData = data.filter((res) => datatempKeys.includes(res) === false);
+  const fullData = await Promise.all(
+    datatempKeys.map(async (character) => {
+      return await scrapCharacterData(character);
+    })
+  );
 
-  return { characters: data };
+  return { data: fullData };
 });
 
 // Run the server!

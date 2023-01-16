@@ -25,6 +25,7 @@ export const getCharactersNamesScrapped = async () => {
 
 export const scrapCharacterData = async (name) => {
   const newName = name.includes(" ") ? name.replaceAll(" ", "_") : name;
+  const textCharactersExist = {};
   try {
     const { data: html } = await axios.get(
       `https://onepiece.fandom.com/wiki/${newName}`
@@ -36,25 +37,54 @@ export const scrapCharacterData = async (name) => {
     const dataStadistics = getDataFromPage(
       ".pi-item.pi-data.pi-item-spacing.pi-border-color > .pi-data-value.pi-font"
     );
-    const image = $(".image.image-thumbnail > .pi-image-thumbnail").attr("src");
+    const resume = getDataFromPage("aside ~ p");
+    const alaData = getDataFromPage(".toc ~ p");
+    console.log(resume.length, alaData.length);
+    resume.length = resume.length - alaData.length;
 
+    const image = $(".image.image-thumbnail > .pi-image-thumbnail").attr("src");
     const imageFilePath = await downloadImage(image, name);
-    uploadImage(imageFilePath);
-    const keyValueData = {};
+    const imageUploadResponse = await uploadImage(imageFilePath);
+
+    const mergeStadisticsData = {};
     dataStadisticsTitles.forEach((data, index) => {
       data = data.replaceAll(":", "");
-      keyValueData[data] = dataStadistics[index];
+      mergeStadisticsData[data] = dataStadistics[index];
     });
-    return new Character({ name: name });
+
+    return new Character({
+      name,
+      age: mergeStadisticsData["Age"],
+      birthday: mergeStadisticsData["Birthday"],
+      origin: mergeStadisticsData["Origin"],
+      status: mergeStadisticsData["Status"],
+      bounty: mergeStadisticsData.hasOwnProperty("Bounty")
+        ? mergeStadisticsData["Bounty"]
+        : "None",
+      image: imageUploadResponse,
+      devil_fruit: mergeStadisticsData["Japanese Name"].includes("no Mi")
+        ? mergeStadisticsData["Japanese Name"]
+        : "None",
+      affiliations: mergeStadisticsData["Affiliations"],
+      epiteth: mergeStadisticsData["Epithet"],
+      resume: resume,
+    });
+    // textCharactersExist[name] = true;
+    // return textCharactersExist;
   } catch (error) {
     console.log(error);
+    textCharactersExist[(name = false)];
+    return textCharactersExist;
   }
   //
 };
 
 const getDataFromPage = (selector) => {
   return $(selector)
-    .map((_, elem) => $(elem).text())
+    .map((_, elem) => {
+      const newtext = $(elem).text();
+      return newtext.replaceAll(/(\[.*?\])/g, "");
+    })
     .get();
 };
 
