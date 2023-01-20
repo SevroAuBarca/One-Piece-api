@@ -39,7 +39,7 @@ export const scrapCharacterData = async (name) => {
     );
     const resume = getDataFromPage("aside ~ p");
     const alaData = getDataFromPage(".toc ~ p");
-    console.log(resume.length, alaData.length);
+    console.log(resume.length, alaData.length, name);
     resume.length = resume.length - alaData.length;
 
     const image = $(".image.image-thumbnail > .pi-image-thumbnail").attr("src");

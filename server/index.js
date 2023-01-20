@@ -10,16 +10,29 @@ const app = fastify({ logger: true });
 
 // Declare a route
 app.get("/", async (request, reply) => {
-  const data = await getCharactersNamesScrapped();
+  //const data = await getCharactersNamesScrapped();
+  //const filterData = data.filter((res) => datatempKeys.includes(res) === false);
   const datatempKeys = datatemp.map((datakey) => Object.keys(datakey)).flat();
-  console.log(datatempKeys);
-  const filterData = data.filter((res) => datatempKeys.includes(res) === false);
-  const fullData = await Promise.all(
-    datatempKeys.map(async (character) => {
-      return await scrapCharacterData(character);
-    })
-  );
+  let fullData = [];
+  let TempArray = [];
+  let count = 0;
 
+  for (let index = 0; index < datatempKeys.length; index++) {
+    //const dataTemp = await scrapCharacterData(datatempKeys[index]);
+    TempArray.push(datatempKeys[index]);
+    if (count === 50) {
+      const tempFullData = await Promise.all(
+        TempArray.map(async (character) => {
+          return await scrapCharacterData(character);
+        })
+      );
+
+      fullData = [tempFullData, ...fullData];
+      TempArray = [];
+      count = 0;
+    }
+    count = count + 1;
+  }
   return { data: fullData };
 });
 
