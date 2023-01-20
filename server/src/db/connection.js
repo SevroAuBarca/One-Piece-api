@@ -1,8 +1,12 @@
-"mongodb+srv://apiAdmin:<password>@cluster0.eezrvir.mongodb.net/test";
+import { env } from "../utils/config.js";
+import mongoose from "mongoose";
 
-const connection = async () => {
+export const connection = async () => {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/test");
+    await mongoose.connect(
+      `mongodb+srv://apiAdmin:${env.password}@cluster0.eezrvir.mongodb.net/test`
+    );
+    console.log("conexion establecida");
   } catch (error) {
     console.log(error);
   }

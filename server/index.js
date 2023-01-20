@@ -1,5 +1,7 @@
 // Require the framework and instantiate it
+import "dotenv/config";
 import fastify from "fastify";
+import { connection } from "./src/db/connection.js";
 import { datatemp } from "./src/models/Characters.template.js";
 import {
   getCharactersNamesScrapped,
@@ -8,6 +10,7 @@ import {
 
 const app = fastify({ logger: true });
 
+connection();
 // Declare a route
 app.get("/", async (request, reply) => {
   //const data = await getCharactersNamesScrapped();
