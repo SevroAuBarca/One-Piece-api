@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const character = new Schema({
   name: String,
-  age: Number,
+  age: String | Number,
   birthday: String,
   origin: String,
   status: String,
@@ -19,4 +19,4 @@ const character = new Schema({
   resume: [String],
 });
 
-const Character = mongoose.model("Character", character);
+export const Character = mongoose.model("Character", character);

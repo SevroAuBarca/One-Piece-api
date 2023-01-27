@@ -1,51 +1,43 @@
 // Require the framework and instantiate it
 import "dotenv/config";
-import fastify from "fastify";
+import express from "express";
+import cors from "@fastify/cors";
 import { connection } from "./src/db/connection.js";
 import { datatemp } from "./src/models/Characters.template.js";
 import {
   getCharactersNamesScrapped,
   scrapCharacterData,
 } from "./src/services/scrapp.js";
+import {
+  getCharacters,
+  postCharacters,
+} from "./src/services/characters.service.js";
 
-const app = fastify({ logger: true });
+const app = express();
+app.use(cors());
+app.use(json());
+const port = 3000;
 
 connection();
 // Declare a route
-app.get("/", async (request, reply) => {
+app.get("/", async (request, response) => {
   //const data = await getCharactersNamesScrapped();
   //const filterData = data.filter((res) => datatempKeys.includes(res) === false);
-  const datatempKeys = datatemp.map((datakey) => Object.keys(datakey)).flat();
-  let fullData = [];
-  let TempArray = [];
-  let count = 0;
-
-  for (let index = 0; index < datatempKeys.length; index++) {
-    //const dataTemp = await scrapCharacterData(datatempKeys[index]);
-    TempArray.push(datatempKeys[index]);
-    if (count === 50) {
-      const tempFullData = await Promise.all(
-        TempArray.map(async (character) => {
-          return await scrapCharacterData(character);
-        })
-      );
-
-      fullData = [tempFullData, ...fullData];
-      TempArray = [];
-      count = 0;
-    }
-    count = count + 1;
-  }
-  return { data: fullData };
+  const fullData = await getCharacters();
+  return response.json({ data: fullData });
 });
 
 // Run the server!
-const start = async () => {
-  try {
-    await app.listen({ port: 3000 });
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
+app.listen(port, () => {
+  submitData();
+  console.log(`Example app listening on port ${port}`);
+});
+
+start();
+const submitData = async () => {
+  const datatempKeys = datatemp.map((datakey) => Object.keys(datakey)).flat();
+  for (const character of datatempKeys) {
+    const characterData = await scrapCharacterData(character);
+    await postCharacters(characterData);
   }
 };
-start();
