@@ -1,27 +1,32 @@
 import { Character } from "../models/character.model.js";
 
-export const getCharacters = async (skip, limit = 100) => {
-  const pages = Math.round(totalCharacters / 100);
-  const characters = await Character.find({}).skip(skip).limit(100);
+const getCharacters = async (page, limit) => {
+  const skip = page === 1 ? 0 : page * 100;
+  const characters = await Character.find({}).skip(skip).limit(limit);
   return characters;
 };
 
-export const getTotalCharacters = async () => {
+const getTotalCharacters = async () => {
   const totalCharacters = await Character.count();
   return totalCharacters;
 };
 
-export const getCharacterByName = async (name) => {
+const getCharacterByName = async (nameChar) => {
   const getAllCharacters = await Character.find({});
-  const findCharacters = getAllCharacters.filter((data) =>
-    data.name.includes(name)
-  );
+  console.log(getAllCharacters[getAllCharacters.length - 1]);
+  const findCharacters = getAllCharacters.filter((data, index) => {
+    return data.name.includes(nameChar);
+  });
+  console.log(findCharacters);
   return findCharacters;
 };
 
-export const getCharacterById = async (id) => {};
+const getCharacterById = async (id) => {
+  const character = await Character.findById(id);
+  return character;
+};
 
-export const postCharacters = async (data) => {
+const postCharacters = async (data) => {
   try {
     await Character.create(data);
     console.log("Añadido correctamente" + data.name);
@@ -31,13 +36,10 @@ export const postCharacters = async (data) => {
   }
 };
 
-export const promiseHandler = async (promise) => {
-  try {
-    const data = await promise;
-    return [data, null];
-  } catch (error) {
-    console.log(error);
-    return [null, error];
-  }
+export {
+  getCharacters,
+  getCharacterByName,
+  getTotalCharacters,
+  getCharacterById,
+  postCharacters,
 };
-export { getCharacters, getCharacterByName, getCharacterById, postCharacters };
